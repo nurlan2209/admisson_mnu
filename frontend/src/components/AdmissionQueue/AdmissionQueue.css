@@ -1,0 +1,128 @@
+.admission-queue {
+  margin-bottom: 2rem;
+}
+
+.queue-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px var(--shadow-color);
+  padding:.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.queue-controls h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.process-next-btn {
+  align-self: flex-start;
+}
+
+.queue-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px var(--shadow-color);
+  overflow: hidden;
+}
+
+.queue-table th,
+.queue-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.queue-table th {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: 600;
+}
+
+.queue-table tr:last-child td {
+  border-bottom: none;
+}
+
+.queue-table tr:hover {
+  background-color: rgba(67, 97, 238, 0.05);
+}
+
+/* Status badges in table */
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.status-waiting {
+  background-color: rgba(255, 209, 102, 0.2);
+  color: #d97706;
+}
+
+.status-in_progress {
+  background-color: rgba(67, 97, 238, 0.2);
+  color: var(--primary-color);
+}
+
+.status-completed {
+  background-color: rgba(82, 183, 136, 0.2);
+  color: var(--success-color);
+}
+
+.status-paused {
+  background-color: rgba(239, 35, 60, 0.2);
+  color: var(--danger-color);
+}
+
+/* Action buttons */
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.loading-text {
+  text-align: center;
+  padding: 2rem;
+  color: var(--light-text);
+  font-style: italic;
+}
+
+.empty-queue {
+  text-align: center;
+  padding: 2rem;
+  font-weight: 600;
+  color: var(--light-text);
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px var(--shadow-color);
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+  .queue-table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .filter-buttons {
+    flex-wrap: wrap;
+  }
+}
