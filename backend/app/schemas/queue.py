@@ -3,6 +3,8 @@ from pydantic import BaseModel
 from datetime import datetime
 
 from app.models.queue import QueueStatus
+from app.schemas.user import UserResponse as UserInfo  # в начале файла
+from app.schemas.user import UserResponse
 
 # Queue schemas
 class QueueBase(BaseModel):
@@ -21,9 +23,10 @@ class QueueResponse(QueueBase):
     status: QueueStatus
     created_at: datetime
     updated_at: Optional[datetime] = None
+    user: Optional[UserResponse] = None  # Вложенная схема пользователя
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class QueueStatusResponse(BaseModel):
     queue_position: int

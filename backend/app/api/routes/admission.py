@@ -18,6 +18,7 @@ def list_queue(
     status: QueueStatus = None
 ):
     """Get all queue entries (for admission staff)"""
+    # Получаем записи с загруженными пользователями
     return get_all_queue_entries(db, status)
 
 @router.post("/next", response_model=QueueResponse)

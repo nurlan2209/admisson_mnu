@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+from sqlalchemy.orm import joinedload
 from typing import Optional, List
 
 from app.models.queue import QueueEntry, QueueStatus
@@ -73,9 +74,10 @@ def get_queue_status(db: Session, user_id: str) -> Optional[QueueStatusResponse]
         estimated_wait_time=estimated_wait
     )
 
+
 def get_all_queue_entries(db: Session, status: QueueStatus = None) -> List[QueueEntry]:
     """Get all queue entries, optionally filtered by status"""
-    query = db.query(QueueEntry)
+    query = db.query(QueueEntry).options(joinedload(QueueEntry.user))
     
     if status:
         query = query.filter(QueueEntry.status == status)
