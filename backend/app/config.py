@@ -9,7 +9,12 @@ class Settings(BaseSettings):
     ADMIN_EMAIL: str
     ADMIN_PASSWORD: str
 
+    postgres_user: Optional[str]
+    postgres_password: Optional[str]
+    postgres_db: Optional[str]
+
     class Config:
         env_file = ".env"
+
 
 settings = Settings()
