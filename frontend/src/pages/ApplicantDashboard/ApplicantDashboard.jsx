@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+// frontend/src/pages/ApplicantDashboard/ApplicantDashboard.jsx
+import React, { useState, useEffect } from 'react'
 import QueueStatus from '../../components/QueueStatus/QueueStatus'
 import { queueAPI } from '../../api'
 import './ApplicantDashboard.css'
@@ -9,6 +10,20 @@ const ApplicantDashboard = () => {
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
   const [notes, setNotes] = useState('')
+
+  // Проверяем статус очереди при загрузке компонента
+  useEffect(() => {
+    const checkQueueStatus = async () => {
+      try {
+        await queueAPI.getStatus()
+        setInQueue(true)
+      } catch (err) {
+        setInQueue(false)
+      }
+    }
+    
+    checkQueueStatus()
+  }, [])
 
   const handleJoinQueue = async (e) => {
     e.preventDefault()
@@ -29,6 +44,10 @@ const ApplicantDashboard = () => {
     }
   }
 
+  const handleQueueStatusChange = (isInQueue) => {
+    setInQueue(isInQueue)
+  }
+
   return (
     <div className="applicant-dashboard">
       <h1>Личный кабинет абитуриента</h1>
@@ -38,7 +57,7 @@ const ApplicantDashboard = () => {
         <h2>Ваш статус</h2>
         
         {inQueue ? (
-          <QueueStatus />
+          <QueueStatus onStatusChange={handleQueueStatusChange} />
         ) : (
           <div className="not-in-queue">
             <p>Вы не находитесь в очереди</p>
@@ -90,6 +109,7 @@ const ApplicantDashboard = () => {
             <li>Следите за статусом вашей очереди на этой странице</li>
             <li>Когда ваша очередь подойдет, вы увидите соответствующее уведомление</li>
             <li>Обратитесь к сотруднику приемной комиссии</li>
+            <li>При необходимости вы можете отменить свою очередь нажав кнопку "Отменить очередь"</li>
           </ol>
         </div>
       </div>

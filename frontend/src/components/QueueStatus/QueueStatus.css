@@ -83,3 +83,7 @@
   background-color: rgba(239, 35, 60, 0.1);
   margin-bottom: 1.5rem;
 }
+
+.cancel-queue-btn {
+  margin-top: 1.5rem;
+}

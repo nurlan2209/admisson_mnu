@@ -47,6 +47,9 @@ export const queueAPI = {
   
   // Получение статуса в очереди
   getStatus: () => api.get('/queue/status'),
+
+  // Отмена очереди
+  cancelQueue: () => api.delete('/queue/cancel'),
 }
 
 // API методы для сотрудников приемной комиссии

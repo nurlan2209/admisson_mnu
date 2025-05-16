@@ -1,8 +1,9 @@
+// frontend/src/components/QueueStatus/QueueStatus.jsx
 import React, { useState, useEffect } from 'react'
 import { queueAPI } from '../../api'
 import './QueueStatus.css'
 
-const QueueStatus = () => {
+const QueueStatus = ({ onStatusChange }) => {
   const [status, setStatus] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -13,8 +14,11 @@ const QueueStatus = () => {
         setLoading(true)
         const response = await queueAPI.getStatus()
         setStatus(response.data)
+        onStatusChange && onStatusChange(true)
+        setError(null)
       } catch (err) {
         setError('Вы не находитесь в очереди')
+        onStatusChange && onStatusChange(false)
       } finally {
         setLoading(false)
       }
@@ -25,7 +29,21 @@ const QueueStatus = () => {
     // Обновляем статус каждые 30 секунд
     const interval = setInterval(fetchStatus, 30000)
     return () => clearInterval(interval)
-  }, [])
+  }, [onStatusChange])
+
+  const handleCancelQueue = async () => {
+    try {
+      setLoading(true)
+      await queueAPI.cancelQueue()
+      setError('Вы не находитесь в очереди')
+      setStatus(null)
+      onStatusChange && onStatusChange(false)
+    } catch (err) {
+      // В случае ошибки мы оставляем текущий статус
+    } finally {
+      setLoading(false)
+    }
+  }
 
   if (loading) {
     return <div className="queue-status-loading">Загрузка статуса очереди...</div>
@@ -76,6 +94,10 @@ const QueueStatus = () => {
             Ваша заявка обрабатывается в данный момент
           </p>
         )}
+        
+        <button onClick={handleCancelQueue} className="btn btn-danger cancel-queue-btn">
+          Отменить очередь
+        </button>
       </div>
     </div>
   )

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.user import User
-from app.models.queue import QueueEntry
+from app.models.queue import QueueEntry, QueueStatus
 from app.schemas import QueueCreate, QueueResponse, QueueStatusResponse
 from app.security import get_current_active_user
 from app.services.queue import create_queue_entry, get_queue_status
@@ -61,3 +61,35 @@ def get_user_queue_status(
         )
     
     return status
+
+@router.delete("/queue/cancel", response_model=QueueResponse)
+def cancel_queue(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Cancel applicant's current queue entry"""
+    # Check if user is an applicant
+    if current_user.role != "applicant":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only applicants can cancel queue entries"
+        )
+    
+    # Find active queue entry
+    queue_entry = db.query(QueueEntry).filter(
+        QueueEntry.user_id == current_user.id,
+        QueueEntry.status.in_(["waiting", "in_progress"])
+    ).first()
+    
+    if not queue_entry:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No active queue entry found"
+        )
+    
+    # Update status to completed (effectively cancelling)
+    queue_entry.status = QueueStatus.COMPLETED
+    db.commit()
+    db.refresh(queue_entry)
+    
+    return queue_entry
