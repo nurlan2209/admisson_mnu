@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { admissionAPI } from '../../api';
 import { debounce } from 'lodash';
+import { FaSearch, FaFilter, FaSort, FaChevronDown } from 'react-icons/fa';
 import './AdmissionQueue.css';
 
 const AdmissionQueue = () => {
@@ -19,7 +20,7 @@ const AdmissionQueue = () => {
         setLoading(true);
         const params = {};
         if (filter !== 'all') params.status = filter;
-        if (term && field !== 'programs') { // Для programs фильтрацию сделаем на клиенте
+        if (term && field !== 'programs') {
           const normalizedTerm = term.trim();
           console.log(`Sending search: field=${field}, term=${normalizedTerm}`);
           params[field] = normalizedTerm;
@@ -30,7 +31,6 @@ const AdmissionQueue = () => {
 
         let filteredQueue = response.data || [];
 
-        // Клиентская фильтрация для programs
         if (term && field === 'programs') {
           const normalizedTerm = term.trim().toLowerCase();
           filteredQueue = filteredQueue.filter((entry) =>
@@ -40,14 +40,13 @@ const AdmissionQueue = () => {
           );
         }
 
-        // Сортировка
         let sortedQueue = [...filteredQueue];
         switch (sort) {
           case 'queue_number_asc':
             sortedQueue.sort((a, b) => a.queue_number - b.queue_number);
             break;
           case 'queue_number_desc':
-            sortedQueue.sort((a, b) => b.queue_number - a.queue_number);
+            sortedQueue.sort((a, b) => b.queue_number - b.queue_number);
             break;
           case 'created_at_asc':
             sortedQueue.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
@@ -140,65 +139,82 @@ const AdmissionQueue = () => {
       <div className="queue-controls">
         <h2>Управление очередью</h2>
         
-        <div className="search-controls">
-          <select 
-            value={searchField}
-            onChange={(e) => setSearchField(e.target.value)}
-            className="search-select"
-          >
-            <option value="full_name">ФИО</option>
-            <option value="phone">Телефон</option>
-            <option value="programs">Программы</option>
-          </select>
-          <input
-            type="text"
-            placeholder={`Поиск по ${searchField === 'full_name' ? 'ФИО' : searchField === 'phone' ? 'телефону' : 'программам'}...`}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
-          />
-        </div>
+        <div className="control-panel">
+          <div className="control-group">
+            <label className="control-label">
+              <FaSearch className="control-icon" /> Поиск
+            </label>
+            <div className="search-controls">
+              <select 
+                value={searchField}
+                onChange={(e) => setSearchField(e.target.value)}
+                className="search-select"
+              >
+                <option value="full_name">ФИО</option>
+                <option value="phone">Телефон</option>
+                <option value="programs">Программы</option>
+              </select>
+              <input
+                type="text"
+                placeholder={`Поиск по ${searchField === 'full_name' ? 'ФИО' : searchField === 'phone' ? 'телефону' : 'программам'}...`}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
+            </div>
+          </div>
 
-        <div className="sort-controls">
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="sort-select"
-          >
-            <option value="queue_number_asc">Номер заявки (по возрастанию)</option>
-            <option value="queue_number_desc">Номер заявки (по убыванию)</option>
-            <option value="created_at_asc">Время создания (по возрастанию)</option>
-            <option value="created_at_desc">Время создания (по убыванию)</option>
-            <option value="status_asc">Статус (алфавитный порядок)</option>
-            <option value="full_name_asc">ФИО (алфавитный порядок)</option>
-          </select>
-        </div>
+          <div className="control-group">
+            <label className="control-label">
+              <FaSort className="control-icon" /> Сортировка
+            </label>
+            <div className="sort-controls">
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="sort-select"
+              >
+                <option value="queue_number_asc">Номер заявки (по возрастанию)</option>
+                <option value="queue_number_desc">Номер заявки (по убыванию)</option>
+                <option value="created_at_asc">Время создания (по возрастанию)</option>
+                <option value="created_at_desc">Время создания (по убыванию)</option>
+                <option value="status_asc">Статус (алфавитный порядок)</option>
+                <option value="full_name_asc">ФИО (алфавитный порядок)</option>
+              </select>
+            </div>
+          </div>
 
-        <div className="filter-buttons">
-          <button 
-            className={`btn ${activeFilter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setActiveFilter('all')}
-          >
-            Все
-          </button>
-          <button 
-            className={`btn ${activeFilter === 'waiting' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setActiveFilter('waiting')}
-          >
-            Ожидающие
-          </button>
-          <button 
-            className={`btn ${activeFilter === 'in_progress' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setActiveFilter('in_progress')}
-          >
-            В обработке
-          </button>
-          <button 
-            className={`btn ${activeFilter === 'completed' ? 'btn-primary' : 'btn-secondary'}`}
-            onClick={() => setActiveFilter('completed')}
-          >
-            Завершено
-          </button>
+          <div className="control-group">
+            <label className="control-label">
+              <FaFilter className="control-icon" /> Фильтры
+            </label>
+            <div className="filter-buttons">
+              <button 
+                className={`btn ${activeFilter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setActiveFilter('all')}
+              >
+                Все
+              </button>
+              <button 
+                className={`btn ${activeFilter === 'waiting' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setActiveFilter('waiting')}
+              >
+                Ожидающие
+              </button>
+              <button 
+                className={`btn ${activeFilter === 'in_progress' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setActiveFilter('in_progress')}
+              >
+                В обработке
+              </button>
+              <button 
+                className={`btn ${activeFilter === 'completed' ? 'btn-primary' : 'btn-secondary'}`}
+                onClick={() => setActiveFilter('completed')}
+              >
+                Завершено
+              </button>
+            </div>
+          </div>
         </div>
         
         <button 
