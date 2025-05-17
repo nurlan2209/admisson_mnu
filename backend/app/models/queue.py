@@ -16,10 +16,10 @@ class QueueEntry(Base):
 
     id = Column(String, primary_key=True, index=True, default=lambda: str(uuid4()))
     queue_number = Column(Integer, index=True)
-    full_name = Column(String, nullable=False)  # Вместо user_id 
-    phone = Column(String, nullable=False)
-    programs = Column(JSON, nullable=False)  # Используем JSON вместо ARRAY
+    full_name = Column(String, nullable=False)    # новое поле: ФИО
+    phone = Column(String, nullable=False)        # новое поле: телефон
+    programs = Column(JSON, nullable=False)       # новое поле: программы (JSON)
     status = Column(Enum(QueueStatus), default=QueueStatus.WAITING)
-    notes = Column(String, nullable=True)
+    notes = Column(String, nullable=True)         # новое поле: заметки
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

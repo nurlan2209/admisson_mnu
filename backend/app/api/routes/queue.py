@@ -1,15 +1,85 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-
+from pydantic import BaseModel
 from app.database import get_db
 from app.models.user import User
 from app.models.queue import QueueEntry, QueueStatus
 from app.schemas import QueueCreate, QueueResponse, QueueStatusResponse
 from app.security import get_current_active_user
 from app.services.queue import create_queue_entry, get_queue_status
+from datetime import datetime
+from app.services import queue as queue_service
 
-router = APIRouter()
+router = APIRouter(prefix="/api/public")
 
+@router.get("/queue/count")
+def queue_count(db: Session = Depends(get_db)):
+    count = queue_service.get_queue_count(db)
+    return {"count": count}
+
+# Pydantic-схема для публичного запроса
+class PublicQueueCreate(BaseModel):
+    full_name: str
+    phone: str
+    programs: list[str]
+    notes: str = ""
+
+# Pydantic-схема для ответа (адаптирована под модель QueueEntry)
+class PublicQueueResponse(BaseModel):
+    id: str
+    queue_number: int
+    full_name: str
+    phone: str
+    programs: list[str]
+    status: QueueStatus
+    notes: str | None = None
+    created_at: datetime
+    updated_at: datetime | None = None
+
+    model_config = {
+        "from_attributes": True,
+        "json_encoders": {
+            datetime: lambda v: v.isoformat(),
+        },
+    }
+
+@router.post("/queue", response_model=PublicQueueResponse)
+async def add_to_public_queue(
+    queue_data: PublicQueueCreate,
+    db: Session = Depends(get_db)
+):
+    """Add a public user to the queue without authentication"""
+    # Проверка, нет ли уже записи с таким номером телефона
+    existing_entry = db.query(QueueEntry).filter(
+        QueueEntry.phone == queue_data.phone,
+        QueueEntry.status.in_([QueueStatus.WAITING, QueueStatus.IN_PROGRESS])
+    ).first()
+    if existing_entry:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Пользователь с этим номером телефона уже в очереди"
+        )
+
+    # Генерация queue_number (на основе количества записей + 1)
+    last_entry = db.query(QueueEntry).order_by(QueueEntry.queue_number.desc()).first()
+    queue_number = (last_entry.queue_number + 1) if last_entry else 1
+
+    # Создание новой записи в очереди
+    queue_entry = QueueEntry(
+        full_name=queue_data.full_name,
+        phone=queue_data.phone,
+        programs=queue_data.programs,
+        notes=queue_data.notes,
+        status=QueueStatus.WAITING,
+        queue_number=queue_number
+    )
+    db.add(queue_entry)
+    db.commit()
+    db.refresh(queue_entry)
+
+    return PublicQueueResponse.from_orm(queue_entry)
+
+# Эндпоинты для аутентифицированных пользователей (адаптированы под вашу модель)
 @router.post("/queue", response_model=QueueResponse)
 def add_to_queue(
     queue_data: QueueCreate,
@@ -17,17 +87,15 @@ def add_to_queue(
     current_user: User = Depends(get_current_active_user)
 ):
     """Add applicant to the queue"""
-    # Check if user is an applicant
     if current_user.role != "applicant":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only applicants can join the queue"
         )
     
-    # Check if user is already in queue
     existing_entry = db.query(QueueEntry).filter(
         QueueEntry.user_id == current_user.id,
-        QueueEntry.status.in_(["waiting", "in_progress"])
+        QueueEntry.status.in_([QueueStatus.WAITING, QueueStatus.IN_PROGRESS])
     ).first()
     
     if existing_entry:
@@ -36,7 +104,6 @@ def add_to_queue(
             detail="Вы уже стоите в очереди"
         )
     
-    # Add user to queue
     return create_queue_entry(db=db, user_id=current_user.id, queue_data=queue_data)
 
 @router.get("/queue/status", response_model=QueueStatusResponse)
@@ -45,14 +112,12 @@ def get_user_queue_status(
     current_user: User = Depends(get_current_active_user)
 ):
     """Get applicant's current position in the queue"""
-    # Check if user is an applicant
     if current_user.role != "applicant":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only applicants can check queue status"
         )
     
-    # Get queue status
     status = get_queue_status(db, current_user.id)
     if not status:
         raise HTTPException(
@@ -68,17 +133,15 @@ def cancel_queue(
     current_user: User = Depends(get_current_active_user)
 ):
     """Cancel applicant's current queue entry"""
-    # Check if user is an applicant
     if current_user.role != "applicant":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only applicants can cancel queue entries"
         )
     
-    # Find active queue entry
     queue_entry = db.query(QueueEntry).filter(
         QueueEntry.user_id == current_user.id,
-        QueueEntry.status.in_(["waiting", "in_progress"])
+        QueueEntry.status.in_([QueueStatus.WAITING, QueueStatus.IN_PROGRESS])
     ).first()
     
     if not queue_entry:
@@ -87,7 +150,6 @@ def cancel_queue(
             detail="No active queue entry found"
         )
     
-    # Update status to completed (effectively cancelling)
     queue_entry.status = QueueStatus.COMPLETED
     db.commit()
     db.refresh(queue_entry)

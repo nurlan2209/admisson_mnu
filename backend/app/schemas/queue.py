@@ -1,6 +1,6 @@
 from typing import Optional, List
-from pydantic import BaseModel
 from datetime import datetime
+from pydantic import BaseModel, ConfigDict
 
 from app.models.queue import QueueStatus
 
@@ -28,15 +28,17 @@ class PublicQueueCreate(BaseModel):
 class QueueResponse(QueueBase):
     id: str
     queue_number: int
-    full_name: str  # Directly store applicant name instead of user_id
-    phone: str      # Store phone directly
-    programs: List[str]  # Store selected programs
+    full_name: str
+    phone: str
+    programs: List[str]
     status: QueueStatus
     created_at: datetime
     updated_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_encoders={datetime: lambda v: v.isoformat()}
+    )
 
 # Queue status response for checking position
 class QueueStatusResponse(BaseModel):

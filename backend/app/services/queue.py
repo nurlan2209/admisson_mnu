@@ -86,3 +86,8 @@ def get_all_queue_entries(db: Session, status: QueueStatus = None) -> List[Queue
         query = query.filter(QueueEntry.status == status)
     
     return query.order_by(QueueEntry.queue_number).all()
+
+def get_queue_count(db: Session) -> int:
+    """Получить количество людей в очереди со статусом WAITING"""
+    count = db.query(QueueEntry).filter(QueueEntry.status == QueueStatus.WAITING).count()
+    return count

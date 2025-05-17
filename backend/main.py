@@ -13,15 +13,20 @@ app = FastAPI(title="Admission Queue API")
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173"],
+    allow_origins=[
+        "http://localhost",
+        "http://localhost:3000",
+        "http://localhost:5173",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
+
 # Include routers
 app.include_router(auth.router, tags=["auth"])
-app.include_router(queue.router, tags=["queue"])
+app.include_router(queue.router)
 app.include_router(admission.router, prefix="/admission", tags=["admission"])
 app.include_router(admin.router, prefix="/admin", tags=["admin"])
 
