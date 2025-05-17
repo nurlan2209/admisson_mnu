@@ -5,47 +5,50 @@ services:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
       - ./backend/.env
-    ports:
-      - "5432:5432"
+    expose:
+      - "5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
+    networks:
+      - app-network
 
   backend:
     build: ./backend
     volumes:
-      - ./backend:/app
-    ports:
-      - "8000:8000"
+      - ./backend/app:/app/app
+      - ./backend/.env:/app/.env
+    expose:
+      - "8000"
     env_file:
       - ./backend/.env
     depends_on:
       db:
         condition: service_healthy
-    command: uvicorn main:app --host 0.0.0.0 --reload
+    command: uvicorn main:app --host 0.0.0.0
+    restart: unless-stopped
+    networks:
+      - app-network
 
   frontend:
-    build: ./frontend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
+    build: 
+      context: ./frontend
+      args:
+        - VITE_API_URL=/api
     ports:
-      - "5173:5173"
+      - "80:80"
     depends_on:
       - backend
-    stdin_open: true
-    
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "admin@example.com"
-      PGADMIN_DEFAULT_PASSWORD: "adminpassword"
-    ports:
-      - "5050:80"
-    depends_on:
-      - db
+    restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   postgres_data:

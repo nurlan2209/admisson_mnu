@@ -3,31 +3,42 @@ from pydantic import BaseModel
 from datetime import datetime
 
 from app.models.queue import QueueStatus
-from app.schemas.user import UserResponse as UserInfo  # в начале файла
-from app.schemas.user import UserResponse
 
-# Queue schemas
+# Base queue schema with common fields
 class QueueBase(BaseModel):
     notes: Optional[str] = None
 
+# Schema for creating a queue entry by an applicant
 class QueueCreate(QueueBase):
     pass
 
+# Schema for updating queue entries by staff
 class QueueUpdate(QueueBase):
     status: Optional[QueueStatus] = None
 
+# Schema for public form submission (without auth)
+class PublicQueueCreate(BaseModel):
+    full_name: str
+    phone: str
+    programs: List[str]
+    notes: Optional[str] = None
+    captcha_token: Optional[str] = None  # Теперь опциональное поле
+
+# Response schema for queue entries - updated to use applicant data directly
 class QueueResponse(QueueBase):
     id: str
     queue_number: int
-    user_id: str
+    full_name: str  # Directly store applicant name instead of user_id
+    phone: str      # Store phone directly
+    programs: List[str]  # Store selected programs
     status: QueueStatus
     created_at: datetime
     updated_at: Optional[datetime] = None
-    user: Optional[UserResponse] = None  # Вложенная схема пользователя
 
     class Config:
         from_attributes = True
 
+# Queue status response for checking position
 class QueueStatusResponse(BaseModel):
     queue_position: int
     total_waiting: int

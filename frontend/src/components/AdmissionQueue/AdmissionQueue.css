@@ -55,7 +55,7 @@
 }
 
 .queue-table tr:hover {
-  background-color: rgba(67, 97, 238, 0.05);
+  background-color: rgba(191, 6, 3, 0.05);
 }
 
 /* Status badges in table */
@@ -68,22 +68,22 @@
 }
 
 .status-waiting {
-  background-color: rgba(255, 209, 102, 0.2);
-  color: #d97706;
+  background-color: rgba(244, 162, 97, 0.2);
+  color: #e07b39;
 }
 
 .status-in_progress {
-  background-color: rgba(67, 97, 238, 0.2);
+  background-color: rgba(191, 6, 3, 0.2);
   color: var(--primary-color);
 }
 
 .status-completed {
-  background-color: rgba(82, 183, 136, 0.2);
+  background-color: rgba(74, 140, 94, 0.2);
   color: var(--success-color);
 }
 
 .status-paused {
-  background-color: rgba(239, 35, 60, 0.2);
+  background-color: rgba(191, 6, 3, 0.2);
   color: var(--danger-color);
 }
 

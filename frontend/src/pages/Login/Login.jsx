@@ -36,11 +36,6 @@ const Login = () => {
           error={error}
         />
         
-        <div className="auth-footer">
-          <p>
-            Еще не зарегистрированы? <Link to="/register">Создать аккаунт</Link>
-          </p>
-        </div>
       </div>
     </div>
   )

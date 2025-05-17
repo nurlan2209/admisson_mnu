@@ -46,7 +46,7 @@
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 1rem;
-  background-color: rgba(67, 97, 238, 0.05);
+  background-color: rgba(191, 6, 3, 0.05);
 }
 
 .instruction-card h3 {

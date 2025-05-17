@@ -1,17 +1,25 @@
-# 1. Базовый образ
-FROM node:18
+# frontend/Dockerfile
+FROM node:18 as build
 
-# 2. Рабочая директория внутри контейнера
 WORKDIR /app
 
-# 3. Копируем package.json и package-lock.json
 COPY package*.json ./
-
-# 4. Устанавливаем зависимости, включая axios и react-router-dom
 RUN npm install
 
-# 5. Копируем остальные файлы
 COPY . .
 
-# 6. Команда для запуска (если используется напрямую)
-CMD ["npm", "run", "dev"]
+# Сборка продакшен-версии
+RUN npm run build
+
+# Второй этап - только для запуска
+FROM nginx:alpine
+
+# Копируем собранные файлы в директорию Nginx
+COPY --from=build /app/dist /usr/share/nginx/html
+
+# Настройка Nginx для работы с React Router и проксирования API
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

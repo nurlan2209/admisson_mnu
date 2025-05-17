@@ -36,7 +36,7 @@
 .form-group input:focus {
   outline: none;
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+  box-shadow: 0 0 0 2px rgba(191, 6, 3, 0.2);
 }
 
 .alert {
@@ -46,13 +46,13 @@
 }
 
 .alert-success {
-  background-color: rgba(82, 183, 136, 0.2);
+  background-color: rgba(74, 140, 94, 0.2);
   border: 1px solid var(--success-color);
   color: var(--success-color);
 }
 
 .alert-danger {
-  background-color: rgba(239, 35, 60, 0.2);
+  background-color: rgba(191, 6, 3, 0.2);
   border: 1px solid var(--danger-color);
   color: var(--danger-color);
 }

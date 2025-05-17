@@ -1,16 +1,16 @@
 /* Базовый сброс стилей и общие переменные */
 :root {
-  --primary-color: #4361ee;
-  --secondary-color: #3f37c9;
-  --accent-color: #f72585;
-  --background-color: #f8f9fa;
-  --text-color: #212529;
-  --light-text: #6c757d;
-  --success-color: #52b788;
-  --warning-color: #ffd166;
-  --danger-color: #ef233c;
-  --border-color: #dee2e6;
-  --shadow-color: rgba(0, 0, 0, 0.1);
+  --primary-color: #bf0603;
+  --secondary-color: #001427;
+  --accent-color: #f54241;
+  --background-color: #f9ecec;
+  --text-color: #1a1a1a;
+  --light-text: #5e6d7a;
+  --success-color: #4a8c5e;
+  --warning-color: #f4a261;
+  --danger-color: #bf0603;
+  --border-color: #d6dade;
+  --shadow-color: rgba(0, 20, 39, 0.1);
 }
 
 * {
@@ -20,7 +20,7 @@
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'Oswald', sans-serif;
   line-height: 1.6;
   color: var(--text-color);
   background-color: var(--background-color);
@@ -40,8 +40,10 @@ body {
   border-radius: 4px;
   font-size: 1rem;
   font-weight: 600;
+  font-family: 'Oswald', sans-serif;
   cursor: pointer;
   transition: background-color 0.2s, transform 0.1s;
+  text-decoration: none;
 }
 
 .btn:hover {
@@ -62,13 +64,11 @@ body {
 }
 
 .btn-secondary {
-  background-color: white;
-  color: var(--primary-color);
-  border: 1px solid var(--primary-color);
+  color: #cbcbcb;
 }
 
 .btn-secondary:hover {
-  background-color: rgba(67, 97, 238, 0.1);
+  background-color: rgba(191, 6, 3, 0.1);
 }
 
 .btn-success {
@@ -93,13 +93,13 @@ body {
 }
 
 .alert-danger {
-  background-color: rgba(239, 35, 60, 0.2);
+  background-color: rgba(191, 6, 3, 0.2);
   border: 1px solid var(--danger-color);
   color: var(--danger-color);
 }
 
 .alert-success {
-  background-color: rgba(82, 183, 136, 0.2);
+  background-color: rgba(74, 140, 94, 0.2);
   border: 1px solid var(--success-color);
   color: var(--success-color);
 }

@@ -4,19 +4,22 @@ from sqlalchemy.orm import joinedload
 from typing import Optional, List
 
 from app.models.queue import QueueEntry, QueueStatus
-from app.schemas import QueueCreate, QueueUpdate, QueueStatusResponse
+from app.schemas import QueueCreate, QueueUpdate, QueueStatusResponse, PublicQueueCreate
 
-def create_queue_entry(db: Session, user_id: str, queue_data: QueueCreate):
-    """Create a new queue entry for a user"""
+# app/services/queue.py
+def create_queue_entry(db: Session, applicant_data: PublicQueueCreate):
+    """Create a new queue entry for an applicant"""
     # Get the next queue number
     last_entry = db.query(func.max(QueueEntry.queue_number)).scalar()
     next_number = 1 if last_entry is None else last_entry + 1
     
     # Create new entry
     db_entry = QueueEntry(
-        user_id=user_id,
         queue_number=next_number,
-        notes=queue_data.notes,
+        full_name=applicant_data.full_name,
+        phone=applicant_data.phone,
+        programs=applicant_data.programs,
+        notes=applicant_data.notes,
         status=QueueStatus.WAITING
     )
     

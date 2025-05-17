@@ -1,33 +1,33 @@
-import React from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../../context/AuthContext'
-import './Header.css'
+import React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import './Header.css';
 
 const Header = () => {
-  const { user, isAuthenticated, logout } = useAuth()
-  const navigate = useNavigate()
+  const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
-    logout()
-    navigate('/login')
-  }
+    logout();
+    navigate('/login');
+  };
 
   return (
     <header className="header">
       <div className="container">
         <div className="header-content">
           <div className="logo">
-            <Link to="/">Электронная очередь</Link>
+            <Link to="/">
+              <img src="/logo.svg" alt="MNU Logo" className="logo-image" />
+            </Link>
           </div>
           <nav className="nav">
             {isAuthenticated ? (
               <div className="user-nav">
                 <span className="user-name">
-                  {user.full_name} ({user.role === 'applicant' 
-                    ? 'Абитуриент' 
-                    : user.role === 'admission' 
-                      ? 'Сотрудник' 
-                      : 'Администратор'})
+                  {user.full_name} ({user.role === 'admission' 
+                    ? 'Сотрудник' 
+                    : 'Администратор'})
                 </span>
                 <button onClick={handleLogout} className="btn btn-secondary">
                   Выйти
@@ -35,11 +35,13 @@ const Header = () => {
               </div>
             ) : (
               <div className="auth-nav">
-                <Link to="/login" className="btn btn-primary">
-                  Вход
-                </Link>
-                <Link to="/register" className="btn btn-secondary">
-                  Регистрация
+                {window.location.pathname !== '/queue' && (
+                  <Link to="/queue" className="btn btn-primary">
+                    Встать в очередь
+                  </Link>
+                )}
+                <Link to="/login" className="btn btn-secondary">
+                  Вход для сотрудников
                 </Link>
               </div>
             )}
@@ -47,7 +49,7 @@ const Header = () => {
         </div>
       </div>
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;

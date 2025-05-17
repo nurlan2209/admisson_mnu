@@ -1,5 +1,5 @@
 .header {
-  background-color: white;
+  background-color: #0F0F0F;
   box-shadow: 0 1px 3px var(--shadow-color);
   padding: 1rem 0;
 }
@@ -10,11 +10,33 @@
   align-items: center;
 }
 
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .logo a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.logo-image {
+  height: 40px;
+  width: auto;
+}
+
+.logo-text {
   font-size: 1.5rem;
   font-weight: 700;
+  font-family: 'Oswald', sans-serif;
+  color: white;
+  transition: color 0.2s ease;
+}
+
+.logo a:hover .logo-text {
   color: var(--primary-color);
-  text-decoration: none;
 }
 
 .nav {
@@ -30,6 +52,8 @@
 
 .user-name {
   font-weight: 600;
+  color: white;
+  font-family: 'Oswald', sans-serif;
 }
 
 .auth-nav {
@@ -47,5 +71,18 @@
   .nav {
     width: 100%;
     justify-content: center;
+  }
+
+  .logo {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .logo-image {
+    height: 32px;
+  }
+
+  .logo-text {
+    font-size: 1.25rem;
   }
 }
