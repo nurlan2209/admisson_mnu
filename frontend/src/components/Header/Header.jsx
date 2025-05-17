@@ -40,7 +40,7 @@ const Header = () => {
                     Встать в очередь
                   </Link>
                 )}
-                <Link to="/login" className="btn btn-secondary">
+                <Link to="/login" className="btn btn-secondary2">
                   Вход для сотрудников
                 </Link>
               </div>

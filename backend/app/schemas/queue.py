@@ -10,7 +10,7 @@ class QueueBase(BaseModel):
 
 # Schema for creating a queue entry by an applicant
 class QueueCreate(QueueBase):
-    pass
+    programs: List[str]
 
 # Schema for updating queue entries by staff
 class QueueUpdate(QueueBase):

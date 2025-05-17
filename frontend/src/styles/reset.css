@@ -46,6 +46,14 @@ body {
   text-decoration: none;
 }
 
+.btn-secondary2{
+    color: white;
+}
+
+::-webkit-scrollbar {
+    display: none;
+}
+
 .btn:hover {
   transform: translateY(-1px);
 }
@@ -61,10 +69,6 @@ body {
 
 .btn-primary:hover {
   background-color: var(--secondary-color);
-}
-
-.btn-secondary {
-  color: #cbcbcb;
 }
 
 .btn-secondary:hover {

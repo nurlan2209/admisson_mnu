@@ -265,17 +265,6 @@ const PublicQueueForm = () => {
           </div>
         </div>
 
-        <div className="form-group">
-          <label htmlFor="notes">Дополнительная информация (опционально)</label>
-          <textarea
-            id="notes"
-            name="notes"
-            value={formData.notes}
-            onChange={handleChange}
-            rows="3"
-          ></textarea>
-        </div>
-
         {/* Капча */}
         {/* 
         <div className="form-group captcha-container">

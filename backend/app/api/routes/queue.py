@@ -4,11 +4,10 @@ from pydantic import BaseModel
 from app.database import get_db
 from app.models.user import User
 from app.models.queue import QueueEntry, QueueStatus
-from app.schemas import QueueCreate, QueueResponse, QueueStatusResponse
+from app.schemas import QueueCreate, QueueResponse, QueueStatusResponse, PublicQueueCreate
 from app.security import get_current_active_user
-from app.services.queue import create_queue_entry, get_queue_status
-from datetime import datetime
 from app.services import queue as queue_service
+from datetime import datetime
 
 router = APIRouter(prefix="/api/public")
 
@@ -17,14 +16,7 @@ def queue_count(db: Session = Depends(get_db)):
     count = queue_service.get_queue_count(db)
     return {"count": count}
 
-# Pydantic-схема для публичного запроса
-class PublicQueueCreate(BaseModel):
-    full_name: str
-    phone: str
-    programs: list[str]
-    notes: str = ""
-
-# Pydantic-схема для ответа (адаптирована под модель QueueEntry)
+# Pydantic-схема для публичного запроса (без изменений)
 class PublicQueueResponse(BaseModel):
     id: str
     queue_number: int
@@ -49,7 +41,6 @@ async def add_to_public_queue(
     db: Session = Depends(get_db)
 ):
     """Add a public user to the queue without authentication"""
-    # Проверка, нет ли уже записи с таким номером телефона
     existing_entry = db.query(QueueEntry).filter(
         QueueEntry.phone == queue_data.phone,
         QueueEntry.status.in_([QueueStatus.WAITING, QueueStatus.IN_PROGRESS])
@@ -60,11 +51,8 @@ async def add_to_public_queue(
             detail="Пользователь с этим номером телефона уже в очереди"
         )
 
-    # Генерация queue_number (на основе количества записей + 1)
     last_entry = db.query(QueueEntry).order_by(QueueEntry.queue_number.desc()).first()
     queue_number = (last_entry.queue_number + 1) if last_entry else 1
-
-    # Создание новой записи в очереди
     queue_entry = QueueEntry(
         full_name=queue_data.full_name,
         phone=queue_data.phone,
@@ -76,10 +64,9 @@ async def add_to_public_queue(
     db.add(queue_entry)
     db.commit()
     db.refresh(queue_entry)
-
     return PublicQueueResponse.from_orm(queue_entry)
 
-# Эндпоинты для аутентифицированных пользователей (адаптированы под вашу модель)
+# Эндпоинты для аутентифицированных пользователей
 @router.post("/queue", response_model=QueueResponse)
 def add_to_queue(
     queue_data: QueueCreate,
@@ -94,7 +81,7 @@ def add_to_queue(
         )
     
     existing_entry = db.query(QueueEntry).filter(
-        QueueEntry.user_id == current_user.id,
+        QueueEntry.phone == current_user.phone,
         QueueEntry.status.in_([QueueStatus.WAITING, QueueStatus.IN_PROGRESS])
     ).first()
     
@@ -104,7 +91,7 @@ def add_to_queue(
             detail="Вы уже стоите в очереди"
         )
     
-    return create_queue_entry(db=db, user_id=current_user.id, queue_data=queue_data)
+    return queue_service.create_queue_entry(db=db, user=current_user, queue_data=queue_data)
 
 @router.get("/queue/status", response_model=QueueStatusResponse)
 def get_user_queue_status(
@@ -118,7 +105,7 @@ def get_user_queue_status(
             detail="Only applicants can check queue status"
         )
     
-    status = get_queue_status(db, current_user.id)
+    status = queue_service.get_queue_status(db, current_user.phone)
     if not status:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -140,7 +127,7 @@ def cancel_queue(
         )
     
     queue_entry = db.query(QueueEntry).filter(
-        QueueEntry.user_id == current_user.id,
+        QueueEntry.phone == current_user.phone,
         QueueEntry.status.in_([QueueStatus.WAITING, QueueStatus.IN_PROGRESS])
     ).first()
     
