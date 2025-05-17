@@ -1,4 +1,3 @@
-// src/components/AdmissionQueue/AdmissionQueue.jsx
 import React, { useState, useEffect } from 'react';
 import { admissionAPI } from '../../api';
 import './AdmissionQueue.css';
@@ -8,22 +7,27 @@ const AdmissionQueue = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeFilter, setActiveFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchField, setSearchField] = useState('full_name');
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
     fetchQueue();
-  }, [activeFilter]);
+  }, [activeFilter, searchTerm, searchField]);
 
   const fetchQueue = async () => {
     try {
       setLoading(true);
-      const response = await admissionAPI.getQueue(
-        activeFilter !== 'all' ? activeFilter : null
-      );
+      const params = {};
+      if (activeFilter !== 'all') params.status = activeFilter;
+      if (searchTerm) params[searchField] = searchTerm;
+
+      const response = await admissionAPI.getQueue(params);
       
       setQueue(response.data || []);
       setError(null);
     } catch (err) {
-      console.error('Error fetching queue:', err);
+      console.error('Ошибка загрузки очереди:', err);
       setError('Ошибка при загрузке очереди');
     } finally {
       setLoading(false);
@@ -33,7 +37,6 @@ const AdmissionQueue = () => {
   const handleProcessNext = async () => {
     try {
       await admissionAPI.processNext();
-      // Обновляем очередь после успешного вызова
       fetchQueue();
     } catch (err) {
       setError('Ошибка при обработке следующего абитуриента');
@@ -43,10 +46,29 @@ const AdmissionQueue = () => {
   const handleUpdateStatus = async (queueId, status) => {
     try {
       await admissionAPI.updateEntry(queueId, { status });
-      // Обновляем очередь после изменения статуса
       fetchQueue();
     } catch (err) {
       setError('Ошибка при обновлении статуса');
+    }
+  };
+
+  const handleDeleteEntry = async (queueId) => {
+    if (!window.confirm('Вы уверены, что хотите удалить эту заявку?')) return;
+    try {
+      setDeletingId(queueId);
+      console.log(`Попытка удаления заявки с ID: ${queueId}`);
+      await admissionAPI.deleteEntry(queueId);
+      fetchQueue();
+    } catch (err) {
+      const errorMessage = err.response?.data?.detail 
+        ? Array.isArray(err.response.data.detail) 
+          ? err.response.data.detail.map(e => e.msg).join('; ')
+          : err.response.data.detail
+        : err.message || 'Не удалось удалить заявку';
+      console.error('Ошибка удаления:', errorMessage);
+      setError(`Ошибка при удалении заявки: ${errorMessage}`);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -70,6 +92,25 @@ const AdmissionQueue = () => {
       <div className="queue-controls">
         <h2>Управление очередью</h2>
         
+        <div className="search-controls">
+          <select 
+            value={searchField}
+            onChange={(e) => setSearchField(e.target.value)}
+            className="search-select"
+          >
+            <option value="full_name">ФИО</option>
+            <option value="phone">Телефон</option>
+            <option value="programs">Программы</option>
+          </select>
+          <input
+            type="text"
+            placeholder={`Поиск по ${searchField === 'full_name' ? 'ФИО' : searchField === 'phone' ? 'телефону' : 'программам'}...`}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+        </div>
+
         <div className="filter-buttons">
           <button 
             className={`btn ${activeFilter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
@@ -88,6 +129,12 @@ const AdmissionQueue = () => {
             onClick={() => setActiveFilter('in_progress')}
           >
             В обработке
+          </button>
+          <button 
+            className={`btn ${activeFilter === 'completed' ? 'btn-primary' : 'btn-secondary'}`}
+            onClick={() => setActiveFilter('completed')}
+          >
+            Завершенные
           </button>
         </div>
         
@@ -140,7 +187,6 @@ const AdmissionQueue = () => {
                       Начать
                     </button>
                   )}
-                  
                   {entry.status === 'in_progress' && (
                     <button
                       className="btn btn-success btn-sm"
@@ -149,7 +195,6 @@ const AdmissionQueue = () => {
                       Завершить
                     </button>
                   )}
-                  
                   {(entry.status === 'waiting' || entry.status === 'in_progress') && (
                     <button
                       className="btn btn-warning btn-sm"
@@ -158,7 +203,6 @@ const AdmissionQueue = () => {
                       Пауза
                     </button>
                   )}
-                  
                   {entry.status === 'paused' && (
                     <button
                       className="btn btn-primary btn-sm"
@@ -167,6 +211,13 @@ const AdmissionQueue = () => {
                       Вернуть
                     </button>
                   )}
+                  <button
+                    className="btn btn-danger btn-sm"
+                    onClick={() => handleDeleteEntry(entry.id)}
+                    disabled={deletingId === entry.id}
+                  >
+                    {deletingId === entry.id ? 'Удаление...' : 'Удалить'}
+                  </button>
                 </td>
               </tr>
             ))}

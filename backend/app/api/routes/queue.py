@@ -1,13 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Path
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from typing import List
+from datetime import datetime
+
 from app.database import get_db
 from app.models.user import User
 from app.models.queue import QueueEntry, QueueStatus
 from app.schemas import QueueCreate, QueueResponse, QueueStatusResponse, PublicQueueCreate
 from app.security import get_current_active_user
 from app.services import queue as queue_service
-from datetime import datetime
 
 router = APIRouter(prefix="/api/public")
 
@@ -16,13 +18,13 @@ def queue_count(db: Session = Depends(get_db)):
     count = queue_service.get_queue_count(db)
     return {"count": count}
 
-# Pydantic-схема для публичного запроса (без изменений)
+# Pydantic-схема для публичного запроса
 class PublicQueueResponse(BaseModel):
     id: str
     queue_number: int
     full_name: str
     phone: str
-    programs: list[str]
+    programs: List[str]
     status: QueueStatus
     notes: str | None = None
     created_at: datetime
@@ -40,7 +42,7 @@ async def add_to_public_queue(
     queue_data: PublicQueueCreate,
     db: Session = Depends(get_db)
 ):
-    """Add a public user to the queue without authentication"""
+    """Добавить публичного пользователя в очередь без аутентификации"""
     existing_entry = db.query(QueueEntry).filter(
         QueueEntry.phone == queue_data.phone,
         QueueEntry.status.in_([QueueStatus.WAITING, QueueStatus.IN_PROGRESS])
@@ -73,7 +75,7 @@ def add_to_queue(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """Add applicant to the queue"""
+    """Добавить заявителя в очередь"""
     if current_user.role != "applicant":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -98,7 +100,7 @@ def get_user_queue_status(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """Get applicant's current position in the queue"""
+    """Получить текущий статус очереди заявителя"""
     if current_user.role != "applicant":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -115,11 +117,11 @@ def get_user_queue_status(
     return status
 
 @router.delete("/queue/cancel", response_model=QueueResponse)
-def cancel_queue(
+def cancel_queue_by_user(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """Cancel applicant's current queue entry"""
+    """Отменить текущую заявку в очереди пользователя (по телефону)"""
     if current_user.role != "applicant":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -142,3 +144,42 @@ def cancel_queue(
     db.refresh(queue_entry)
     
     return queue_entry
+
+@router.delete("/queue/cancel/{queue_id}", response_model=QueueResponse)
+def cancel_queue_by_id(
+    queue_id: str = Path(..., description="ID заявки для отмены"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Отменить заявку в очереди по ID"""
+    queue_entry = db.query(QueueEntry).filter(
+        QueueEntry.id == queue_id,
+        QueueEntry.status.in_([QueueStatus.WAITING, QueueStatus.IN_PROGRESS])
+    ).first()
+
+    if not queue_entry:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Queue entry not found"
+        )
+    
+    if current_user.role != "applicant" or queue_entry.phone != current_user.phone:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not allowed to cancel this queue entry"
+        )
+
+    queue_entry.status = QueueStatus.COMPLETED
+    db.commit()
+    db.refresh(queue_entry)
+
+    return queue_entry
+
+@router.put("/queue/cancel/{queue_id}", response_model=QueueResponse)
+def cancel_queue_put(
+    queue_id: str,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Опциональный PUT для отмены заявки по ID (если фронтенд требует PUT)"""
+    return cancel_queue_by_id(queue_id, db, current_user)
