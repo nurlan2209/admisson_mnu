@@ -1,7 +1,9 @@
+# Обновленная конфигурация маршрутов в backend/main.py
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import auth, queue, admission, admin
+from app.api.routes import auth, queue, admission, admin, public
 from app.database import Base, engine
 from app.config import settings
 
@@ -23,12 +25,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 # Include routers
 app.include_router(auth.router, tags=["auth"])
 app.include_router(queue.router)
 app.include_router(admission.router, prefix="/admission", tags=["admission"])
 app.include_router(admin.router, prefix="/admin", tags=["admin"])
+app.include_router(public.router, prefix="/api/public", tags=["public"])  # Добавляем префикс для публичных API
 
 @app.get("/")
 def read_root():

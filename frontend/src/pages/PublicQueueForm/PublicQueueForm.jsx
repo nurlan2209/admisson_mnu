@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+// frontend/src/pages/PublicQueueForm/PublicQueueForm.jsx - обновленная версия
+import React, { useState, useEffect } from 'react';
 // import ReCAPTCHA from 'react-google-recaptcha';
 import api from '../../api';
+import QueueStatusCheck from '../../components/QueueStatusCheck/QueueStatusCheck';
 import './PublicQueueForm.css';
 
 // Программы по категориям
@@ -143,12 +145,23 @@ const PublicQueueForm = () => {
 
   if (success) {
     return (
-      <div className="success-message">
-        <h2>Заявка успешно отправлена!</h2>
-        <p>Вы добавлены в очередь. Ожидайте вызова сотрудника приемной комиссии.</p>
-        {queueCount !== null && (
-          <p>Ваше место в очереди: <strong>{queueCount}</strong></p>
-        )}
+      <div className="public-form-container">
+        <div className="success-message">
+          <h2>Заявка успешно отправлена!</h2>
+          <p>Вы добавлены в очередь. Ожидайте вызова сотрудника приемной комиссии.</p>
+          {queueCount !== null && (
+            <p>Ваше место в очереди: <strong>{queueCount}</strong></p>
+          )}
+          
+          {/* Кнопка для возврата к форме */}
+          <button 
+            className="btn btn-primary"
+            onClick={() => setSuccess(false)}
+            style={{ marginTop: '1rem' }}
+          >
+            Вернуться к форме
+          </button>
+        </div>
       </div>
     );
   }
@@ -160,6 +173,7 @@ const PublicQueueForm = () => {
       <p className="form-description">
         Заполните форму, чтобы занять очередь в приемную комиссию
       </p>
+      
 
       {error && <div className="alert alert-danger">{error}</div>}
 
@@ -283,6 +297,11 @@ const PublicQueueForm = () => {
           {loading ? 'Отправка...' : 'Отправить заявку'}
         </button>
       </form>
+    {/* Новая секция для проверки статуса заявки */}
+      <div className="queue-check-section">
+        <h2>Уже подали заявку?</h2>
+        <QueueStatusCheck />
+      </div>
     </div>
   );
 };

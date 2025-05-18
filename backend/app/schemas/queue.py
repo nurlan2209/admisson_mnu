@@ -46,3 +46,25 @@ class QueueStatusResponse(BaseModel):
     total_waiting: int
     status: QueueStatus
     estimated_wait_time: Optional[int] = None  # Minutes
+
+# Расширенная схема ответа с информацией о позиции в очереди
+class PublicQueueResponse(BaseModel):
+    id: str
+    queue_number: int
+    full_name: str
+    phone: str
+    programs: List[str]
+    status: QueueStatus
+    notes: Optional[str] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+    
+    # Дополнительные поля для информации об очереди
+    position: Optional[int] = None
+    people_ahead: Optional[int] = None
+    estimated_time: Optional[int] = None  # в минутах
+
+    model_config = ConfigDict(
+        from_attributes=True,
+        json_encoders={datetime: lambda v: v.isoformat()}
+    )

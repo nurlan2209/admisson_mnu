@@ -213,3 +213,105 @@
     font-size: 1.75rem;
   }
 }
+
+.queue-check-section {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px var(--shadow-color);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.queue-check-section h2 {
+  font-size: 1.5rem;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(191, 6, 3, 0.2);
+}
+
+/* Стили для разделителя между формой и секцией проверки */
+.section-divider {
+  display: flex;
+  align-items: center;
+  margin: 2rem 0;
+  color: var(--light-text);
+}
+
+.section-divider::before,
+.section-divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.section-divider::before {
+  margin-right: 1rem;
+}
+
+.section-divider::after {
+  margin-left: 1rem;
+}
+
+/* Улучшение стилей для карточки успешной отправки */
+.success-message {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px var(--shadow-color);
+  padding: 2rem;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.success-message h2 {
+  color: var(--success-color);
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.success-message p {
+  margin-bottom: 1rem;
+  color: var(--text-color);
+  font-size: 1.1rem;
+}
+
+.success-message strong {
+  color: var(--primary-color);
+  font-size: 1.2rem;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 576px) {
+  .queue-check-section {
+    padding: 1rem;
+  }
+  
+  .queue-check-section h2 {
+    font-size: 1.25rem;
+  }
+  
+  .success-message {
+    padding: 1.5rem;
+  }
+  
+  .success-message h2 {
+    font-size: 1.25rem;
+  }
+}

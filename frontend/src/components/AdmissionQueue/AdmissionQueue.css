@@ -231,6 +231,7 @@
 .status-waiting {
   background-color: rgba(244, 162, 97, 0.2);
   color: #e07b39;
+  margin-left: -5px;
 }
 
 .status-in_progress {
@@ -301,6 +302,7 @@
   .status-badge {
     font-size: 0.875rem;
     padding: 0.4rem 0.8rem;
+    margin-right: 25px;
   }
 
   .card-header {

@@ -26,7 +26,7 @@ const Login = () => {
       <div className="auth-container">
         <h1>Вход в систему</h1>
         <p className="auth-description">
-          Введите ваши учетные данные для входа в электронную очередь
+          Введите ваши учетные данные для входа в систему
         </p>
         
         <AuthForm 

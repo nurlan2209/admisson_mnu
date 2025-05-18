@@ -69,6 +69,33 @@ export const queueAPI = {
    * @returns {Promise} - Ответ от сервера
    */
   cancelQueue: () => api.delete('/queue/cancel'),
+  
+  /**
+   * Проверка статуса очереди по ФИО
+   * @param {string} fullName - ФИО абитуриента
+   * @returns {Promise} - Ответ от сервера
+   */
+  checkQueueByName: (fullName) => api.get(`/api/public/queue/check?full_name=${encodeURIComponent(fullName)}`),
+  
+  /**
+   * Отмена заявки по ID
+   * @param {string} queueId - ID заявки
+   * @returns {Promise} - Ответ от сервера
+   */
+  cancelQueueById: (queueId) => api.delete(`/api/public/queue/cancel/${queueId}`),
+  
+  /**
+   * Перемещение заявки назад в очереди
+   * @param {string} queueId - ID заявки
+   * @returns {Promise} - Ответ от сервера
+   */
+  moveBackInQueue: (queueId) => api.put(`/api/public/queue/move-back/${queueId}`),
+  
+  /**
+   * Получение количества людей в очереди
+   * @returns {Promise} - Ответ от сервера
+   */
+  getQueueCount: () => api.get('/api/public/queue/count')
 };
 
 // API методы для сотрудников приемной комиссии
