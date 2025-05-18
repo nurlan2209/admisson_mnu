@@ -315,3 +315,13 @@
     font-size: 1.25rem;
   }
 }
+
+.control-label {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+}
+
+.control-icon {
+  margin-right: 0.5rem;
+}

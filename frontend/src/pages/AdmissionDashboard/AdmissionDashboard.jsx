@@ -1,42 +1,75 @@
-import React from 'react'
-import AdmissionQueue from '../../components/AdmissionQueue/AdmissionQueue'
-import './AdmissionDashboard.css'
+import React from 'react';
+import AdmissionQueue from '../../components/AdmissionQueue/AdmissionQueue';
+import { useTranslation } from 'react-i18next';
+import { FaChevronDown } from 'react-icons/fa';
+import './AdmissionDashboard.css';
 
 const AdmissionDashboard = () => {
+  const { t, i18n } = useTranslation();
+
+  // Обработчик смены языка
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+  };
+
   return (
     <div className="admission-dashboard">
-      <h1>Панель управления очередью</h1>
-      
+
+      <h1>{t('admissionDashboard.title')}</h1>
+
       <div className="dashboard-content">
         <div className="queue-management">
           <AdmissionQueue />
         </div>
-        
+
         <div className="sidebar">
           <div className="sidebar-section">
-            <h2>Инструкция</h2>
+            <h2>{t('admissionDashboard.instructionsTitle')}</h2>
             <div className="instruction-card">
-              <h3>Управление очередью:</h3>
+              <h3>{t('admissionDashboard.queueManagementTitle')}</h3>
               <ul>
-                <li><strong>Фильтр "Все"</strong> - показывает все заявки</li>
-                <li><strong>Фильтр "Ожидающие"</strong> - показывает ожидающих абитуриентов</li>
-                <li><strong>Фильтр "В обработке"</strong> - показывает абитуриентов, с которыми сейчас работают</li>
-                <li><strong>Кнопка "Вызвать следующего"</strong> - автоматически перемещает следующего ожидающего абитуриента в статус "В обработке"</li>
+                <li>
+                  <strong>{t('admissionDashboard.allFilter')}</strong> - {t('admissionDashboard.allFilterDesc')}
+                </li>
+                <li>
+                  <strong>{t('admissionDashboard.waitingFilter')}</strong> -{' '}
+                  {t('admissionDashboard.waitingFilterDesc')}
+                </li>
+                <li>
+                  <strong>{t('admissionDashboard.inProgressFilter')}</strong> -{' '}
+                  {t('admissionDashboard.inProgressFilterDesc')}
+                </li>
+                <li>
+                  <strong>{t('admissionDashboard.processNextButton')}</strong> -{' '}
+                  {t('admissionDashboard.processNextDesc')}
+                </li>
               </ul>
-              
-              <h3>Действия с заявками:</h3>
+
+              <h3>{t('admissionDashboard.actionsTitle')}</h3>
               <ul>
-                <li><strong>Начать</strong> - начать работу с абитуриентом</li>
-                <li><strong>Завершить</strong> - отметить заявку как обработанную</li>
-                <li><strong>Пауза</strong> - временно приостановить обработку заявки</li>
-                <li><strong>Вернуть</strong> - вернуть заявку в очередь из паузы</li>
+                <li>
+                  <strong>{t('admissionDashboard.startAction')}</strong> -{' '}
+                  {t('admissionDashboard.startActionDesc')}
+                </li>
+                <li>
+                  <strong>{t('admissionDashboard.completeAction')}</strong> -{' '}
+                  {t('admissionDashboard.completeActionDesc')}
+                </li>
+                <li>
+                  <strong>{t('admissionDashboard.pauseAction')}</strong> -{' '}
+                  {t('admissionDashboard.pauseActionDesc')}
+                </li>
+                <li>
+                  <strong>{t('admissionDashboard.resumeAction')}</strong> -{' '}
+                  {t('admissionDashboard.resumeActionDesc')}
+                </li>
               </ul>
             </div>
           </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default AdmissionDashboard
+export default AdmissionDashboard;

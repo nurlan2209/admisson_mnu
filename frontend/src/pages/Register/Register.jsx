@@ -1,58 +1,63 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { useAuth } from '../../context/AuthContext'
-import AuthForm from '../../components/AuthForm/AuthForm'
-import './Register.css'
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import AuthForm from '../../components/AuthForm/AuthForm';
+import { useTranslation } from 'react-i18next';
+import { FaChevronDown } from 'react-icons/fa';
+import './Register.css';
 
 const Register = () => {
-  const { register, login } = useAuth()
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const navigate = useNavigate()
+  const { t, i18n } = useTranslation();
+  const { register, login } = useAuth();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   const handleRegister = async (formData) => {
     try {
-      setLoading(true)
-      setError(null)
-      
-      // Регистрация пользователя
-      await register(formData)
-      
-      // После успешной регистрации выполняем автоматический вход
-      await login(formData.email, formData.password)
-      
-      // Перенаправляем на страницу абитуриента
-      navigate('/applicant')
+      setLoading(true);
+      setError(null);
+
+      await register(formData);
+
+      await login(formData.email, formData.password);
+
+      navigate('/applicant');
     } catch (err) {
-      setError(err.response?.data?.detail || 'Ошибка при регистрации')
+      setError(err.response?.data?.detail || t('register.error'));
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
+  // Обработчик смены языка
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+  };
 
   return (
     <div className="register-page">
       <div className="auth-container">
-        <h1>Регистрация</h1>
-        <p className="auth-description">
-          Создайте аккаунт, чтобы использовать систему электронной очереди
-        </p>
-        
-        <AuthForm 
+
+        <h1>{t('register.title')}</h1>
+        <p className="auth-description">{t('register.description')}</p>
+
+        <AuthForm
           isLogin={false}
           onSubmit={handleRegister}
           loading={loading}
           error={error}
         />
-        
+
         <div className="auth-footer">
           <p>
-            Уже есть аккаунт? <Link to="/login">Войти</Link>
+            {t('register.hasAccount')}{' '}
+            <Link to="/login">{t('register.loginLink')}</Link>
           </p>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Register
+export default Register;

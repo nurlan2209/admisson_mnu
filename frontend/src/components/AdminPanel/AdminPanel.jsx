@@ -1,64 +1,65 @@
-import React, { useState } from 'react'
-import { adminAPI } from '../../api'
-import './AdminPanel.css'
+import React, { useState } from 'react';
+import { adminAPI } from '../../api';
+import { useTranslation } from 'react-i18next';
+import { FaChevronDown } from 'react-icons/fa';
+import './AdminPanel.css';
 
 const AdminPanel = () => {
+  const { t, i18n } = useTranslation();
   const [formData, setFormData] = useState({
     email: '',
     full_name: '',
     phone: '',
     password: '',
-  })
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [success, setSuccess] = useState(null)
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData({ ...formData, [name]: value })
-  }
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    
+    e.preventDefault();
     try {
-      setLoading(true)
-      setError(null)
-      setSuccess(null)
-      
-      await adminAPI.createAdmissionStaff(formData)
-      
-      setSuccess('Сотрудник приемной комиссии успешно создан')
-      
-      // Сбрасываем форму
+      setLoading(true);
+      setError(null);
+      setSuccess(null);
+
+      await adminAPI.createAdmissionStaff(formData);
+
+      setSuccess(t('adminPanel.success'));
       setFormData({
         email: '',
         full_name: '',
         phone: '',
         password: '',
-      })
+      });
     } catch (err) {
-      setError(err.response?.data?.detail || 'Ошибка при создании сотрудника')
+      setError(err.response?.data?.detail || t('adminPanel.error'));
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
+  // Обработчик смены языка
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+  };
 
   return (
     <div className="admin-panel">
-      <h2>Создать сотрудника приемной комиссии</h2>
-      
-      {success && (
-        <div className="alert alert-success">{success}</div>
-      )}
-      
-      {error && (
-        <div className="alert alert-danger">{error}</div>
-      )}
-      
+
+      <h2>{t('adminPanel.title')}</h2>
+
+      {success && <div className="alert alert-success">{success}</div>}
+      {error && <div className="alert alert-danger">{error}</div>}
+
       <form onSubmit={handleSubmit} className="admin-form">
         <div className="form-group">
-          <label htmlFor="full_name">ФИО сотрудника</label>
+          <label htmlFor="full_name">{t('adminPanel.fullNameLabel')}</label>
           <input
             type="text"
             id="full_name"
@@ -68,9 +69,9 @@ const AdminPanel = () => {
             required
           />
         </div>
-        
+
         <div className="form-group">
-          <label htmlFor="email">Email</label>
+          <label htmlFor="email">{t('adminPanel.emailLabel')}</label>
           <input
             type="email"
             id="email"
@@ -80,9 +81,9 @@ const AdminPanel = () => {
             required
           />
         </div>
-        
+
         <div className="form-group">
-          <label htmlFor="phone">Телефон</label>
+          <label htmlFor="phone">{t('adminPanel.phoneLabel')}</label>
           <input
             type="tel"
             id="phone"
@@ -92,9 +93,9 @@ const AdminPanel = () => {
             required
           />
         </div>
-        
+
         <div className="form-group">
-          <label htmlFor="password">Пароль</label>
+          <label htmlFor="password">{t('adminPanel.passwordLabel')}</label>
           <input
             type="password"
             id="password"
@@ -104,17 +105,13 @@ const AdminPanel = () => {
             required
           />
         </div>
-        
-        <button 
-          type="submit" 
-          className="btn btn-primary"
-          disabled={loading}
-        >
-          {loading ? 'Создание...' : 'Создать сотрудника'}
+
+        <button type="submit" className="btn btn-primary" disabled={loading}>
+          {loading ? t('adminPanel.creating') : t('adminPanel.createButton')}
         </button>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default AdminPanel
+export default AdminPanel;

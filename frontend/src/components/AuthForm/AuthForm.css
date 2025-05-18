@@ -42,3 +42,32 @@
   opacity: 0.7;
   cursor: not-allowed;
 }
+
+.auth-form-container {
+  position: relative;
+}
+
+.control-label {
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+}
+
+.control-icon {
+  margin-right: 0.5rem;
+}
+
+.language-select {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  background-color: #fff;
+}
+
+.language-select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}

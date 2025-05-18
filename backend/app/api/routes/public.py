@@ -101,7 +101,6 @@ async def check_queue_by_name(
     response = PublicQueueResponse.from_orm(queue_entry)
     response.position = position
     response.people_ahead = people_ahead
-    response.estimated_time = estimated_time
     
     return response
 

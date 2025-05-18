@@ -2,9 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { admissionAPI } from '../../api';
 import { debounce } from 'lodash';
 import { FaSearch, FaFilter, FaSort, FaChevronDown } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
 import './AdmissionQueue.css';
 
 const AdmissionQueue = () => {
+  const { t, i18n } = useTranslation();
   const [queue, setQueue] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,13 +24,10 @@ const AdmissionQueue = () => {
         if (filter !== 'all') params.status = filter;
         if (term && field !== 'programs') {
           const normalizedTerm = term.trim();
-          console.log(`Sending search: field=${field}, term=${normalizedTerm}`);
           params[field] = normalizedTerm;
         }
 
         const response = await admissionAPI.getQueue(params);
-        console.log('Queue response:', response.data);
-
         let filteredQueue = response.data || [];
 
         if (term && field === 'programs') {
@@ -67,8 +66,7 @@ const AdmissionQueue = () => {
         setQueue(sortedQueue);
         setError(null);
       } catch (err) {
-        console.error('Ошибка загрузки очереди:', err);
-        setError('Ошибка при загрузке очереди');
+        setError(t('admissionQueue.errorLoading'));
       } finally {
         setLoading(false);
       }
@@ -86,7 +84,7 @@ const AdmissionQueue = () => {
       await admissionAPI.processNext();
       fetchQueue(activeFilter, searchTerm, searchField, sortBy);
     } catch (err) {
-      setError('Ошибка при обработке следующего абитуриента');
+      setError(t('admissionQueue.errorProcessing'));
     }
   };
 
@@ -95,68 +93,67 @@ const AdmissionQueue = () => {
       await admissionAPI.updateEntry(queueId, { status });
       fetchQueue(activeFilter, searchTerm, searchField, sortBy);
     } catch (err) {
-      setError('Ошибка при обновлении статуса');
+      setError(t('admissionQueue.errorUpdatingStatus'));
     }
   };
 
   const handleDeleteEntry = async (queueId) => {
-    if (!window.confirm('Вы уверены, что хотите удалить эту заявку?')) return;
+    if (!window.confirm(t('admissionQueue.confirmDelete'))) return;
     try {
       setDeletingId(queueId);
-      console.log(`Попытка удаления заявки с ID: ${queueId}`);
       await admissionAPI.deleteEntry(queueId);
       fetchQueue(activeFilter, searchTerm, searchField, sortBy);
     } catch (err) {
-      const errorMessage = err.response?.data?.detail 
-        ? Array.isArray(err.response.data.detail) 
-          ? err.response.data.detail.map(e => e.msg).join('; ')
+      const errorMessage = err.response?.data?.detail
+        ? Array.isArray(err.response.data.detail)
+          ? err.response.data.detail.map((e) => e.msg).join('; ')
           : err.response.data.detail
-        : err.message || 'Не удалось удалить заявку';
-      console.error('Ошибка удаления:', errorMessage);
-      setError(`Ошибка при удалении заявки: ${errorMessage}`);
+        : err.message || t('admissionQueue.errorDeletingDefault');
+      setError(`${t('admissionQueue.errorDeleting')} ${errorMessage}`);
     } finally {
       setDeletingId(null);
     }
   };
 
   const getStatusText = (status) => {
-    switch (status) {
-      case 'waiting':
-        return 'В ожидании';
-      case 'in_progress':
-        return 'Обрабатывается';
-      case 'completed':
-        return 'Завершено';
-      case 'paused':
-        return 'Приостановлено';
-      default:
-        return 'Неизвестно';
-    }
+    return t(`admissionQueue.status.${status}`);
+  };
+
+  // Обработчик смены языка
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
   };
 
   return (
     <div className="admission-queue">
       <div className="queue-controls">
-        <h2>Управление очередью</h2>
-        
+        <h2>{t('admissionQueue.title')}</h2>
+
         <div className="control-panel">
           <div className="control-group">
             <label className="control-label">
-              <FaSearch className="control-icon" /> Поиск
+              <FaSearch className="control-icon" /> {t('admissionQueue.searchLabel')}
             </label>
             <div className="search-controls">
-              <select 
+              <select
                 value={searchField}
                 onChange={(e) => setSearchField(e.target.value)}
                 className="search-select"
               >
-                <option value="full_name">ФИО</option>
-                <option value="phone">Телефон</option>
-                <option value="programs">Программы</option>
+                <option value="full_name">{t('admissionQueue.searchFields.fullName')}</option>
+                <option value="phone">{t('admissionQueue.searchFields.phone')}</option>
+                <option value="programs">{t('admissionQueue.searchFields.programs')}</option>
               </select>
               <input
                 type="text"
-                placeholder={`Поиск по ${searchField === 'full_name' ? 'ФИО' : searchField === 'phone' ? 'телефону' : 'программам'}...`}
+                placeholder={t('admissionQueue.searchPlaceholder', {
+                  field:
+                    searchField === 'full_name'
+                      ? t('admissionQueue.searchFields.fullName')
+                      : searchField === 'phone'
+                      ? t('admissionQueue.searchFields.phone')
+                      : t('admissionQueue.searchFields.programs'),
+                })}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"
@@ -166,7 +163,7 @@ const AdmissionQueue = () => {
 
           <div className="control-group">
             <label className="control-label">
-              <FaSort className="control-icon" /> Сортировка
+              <FaSort className="control-icon" /> {t('admissionQueue.sortLabel')}
             </label>
             <div className="sort-controls">
               <select
@@ -174,78 +171,91 @@ const AdmissionQueue = () => {
                 onChange={(e) => setSortBy(e.target.value)}
                 className="sort-select"
               >
-                <option value="queue_number_asc">Номер заявки (по возрастанию)</option>
-                <option value="queue_number_desc">Номер заявки (по убыванию)</option>
-                <option value="created_at_asc">Время создания (по возрастанию)</option>
-                <option value="created_at_desc">Время создания (по убыванию)</option>
-                <option value="status_asc">Статус (алфавитный порядок)</option>
-                <option value="full_name_asc">ФИО (алфавитный порядок)</option>
+                <option value="queue_number_asc">{t('admissionQueue.sortOptions.queueNumberAsc')}</option>
+                <option value="queue_number_desc">{t('admissionQueue.sortOptions.queueNumberDesc')}</option>
+                <option value="created_at_asc">{t('admissionQueue.sortOptions.createdAtAsc')}</option>
+                <option value="created_at_desc">{t('admissionQueue.sortOptions.createdAtDesc')}</option>
+                <option value="status_asc">{t('admissionQueue.sortOptions.statusAsc')}</option>
+                <option value="full_name_asc">{t('admissionQueue.sortOptions.fullNameAsc')}</option>
               </select>
             </div>
           </div>
 
           <div className="control-group">
             <label className="control-label">
-              <FaFilter className="control-icon" /> Фильтры
+              <FaFilter className="control-icon" /> {t('admissionQueue.filterLabel')}
             </label>
             <div className="filter-buttons">
-              <button 
+              <button
                 className={`btn ${activeFilter === 'all' ? 'btn-primary' : 'btn-secondary'}`}
                 onClick={() => setActiveFilter('all')}
               >
-                Все
+                {t('admissionQueue.filters.all')}
               </button>
-              <button 
+              <button
                 className={`btn ${activeFilter === 'waiting' ? 'btn-primary' : 'btn-secondary'}`}
                 onClick={() => setActiveFilter('waiting')}
               >
-                Ожидающие
+                {t('admissionQueue.filters.waiting')}
               </button>
-              <button 
+              <button
                 className={`btn ${activeFilter === 'in_progress' ? 'btn-primary' : 'btn-secondary'}`}
                 onClick={() => setActiveFilter('in_progress')}
               >
-                В обработке
+                {t('admissionQueue.filters.inProgress')}
               </button>
-              <button 
+              <button
                 className={`btn ${activeFilter === 'completed' ? 'btn-primary' : 'btn-secondary'}`}
                 onClick={() => setActiveFilter('completed')}
               >
-                Завершено
+                {t('admissionQueue.filters.completed')}
               </button>
             </div>
           </div>
         </div>
-        
-        <button 
-          className="btn btn-success process-next-btn"
-          onClick={handleProcessNext}
-        >
-          Вызвать следующего
+
+        <button className="btn btn-success process-next-btn" onClick={handleProcessNext}>
+          {t('admissionQueue.processNextButton')}
         </button>
       </div>
 
       {error && <div className="alert alert-danger">{error}</div>}
 
       {loading ? (
-        <p className="loading-text">Загрузка очереди...</p>
+        <p className="loading-text">{t('admissionQueue.loading')}</p>
       ) : queue.length === 0 ? (
-        <p className="empty-queue">В очереди никого нет</p>
+        <p className="empty-queue">{t('admissionQueue.emptyQueue')}</p>
       ) : (
         <div className="queue-cards">
           {queue.map((entry) => (
             <div key={entry.id} className={`queue-card status-${entry.status}`}>
               <div className="card-header">
-                <span className="queue-number">№ {entry.queue_number}</span>
+                <span className="queue-number">
+                  {t('admissionQueue.queueNumber', { number: entry.queue_number })}
+                </span>
                 <span className={`status-badge status-${entry.status}`}>
                   {getStatusText(entry.status)}
                 </span>
               </div>
               <div className="card-body">
-                <p><strong>ФИО:</strong> {entry.full_name}</p>
-                <p><strong>Телефон:</strong> {entry.phone}</p>
-                <p><strong>Программы:</strong> {entry.programs.join(', ')}</p>
-                <p><strong>Время:</strong> {new Date(entry.created_at).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' })} {new Date(entry.created_at).toLocaleTimeString('ru-RU')}</p>
+                <p>
+                  <strong>{t('admissionQueue.card.fullName')}</strong> {entry.full_name}
+                </p>
+                <p>
+                  <strong>{t('admissionQueue.card.phone')}</strong> {entry.phone}
+                </p>
+                <p>
+                  <strong>{t('admissionQueue.card.programs')}</strong> {entry.programs.join(', ')}
+                </p>
+                <p>
+                  <strong>{t('admissionQueue.card.time')}</strong>{' '}
+                  {new Date(entry.created_at).toLocaleDateString(i18n.language === 'ru' ? 'ru-RU' : 'en-US', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                  })}{' '}
+                  {new Date(entry.created_at).toLocaleTimeString(i18n.language === 'ru' ? 'ru-RU' : 'en-US')}
+                </p>
               </div>
               <div className="card-actions">
                 {entry.status === 'waiting' && (
@@ -253,7 +263,7 @@ const AdmissionQueue = () => {
                     className="btn btn-primary btn-sm"
                     onClick={() => handleUpdateStatus(entry.id, 'in_progress')}
                   >
-                    Начать
+                    {t('admissionQueue.actions.start')}
                   </button>
                 )}
                 {entry.status === 'in_progress' && (
@@ -261,7 +271,7 @@ const AdmissionQueue = () => {
                     className="btn btn-success btn-sm"
                     onClick={() => handleUpdateStatus(entry.id, 'completed')}
                   >
-                    Завершить
+                    {t('admissionQueue.actions.complete')}
                   </button>
                 )}
                 {(entry.status === 'waiting' || entry.status === 'in_progress') && (
@@ -269,7 +279,7 @@ const AdmissionQueue = () => {
                     className="btn btn-warning btn-sm"
                     onClick={() => handleUpdateStatus(entry.id, 'paused')}
                   >
-                    Пауза
+                    {t('admissionQueue.actions.pause')}
                   </button>
                 )}
                 {entry.status === 'paused' && (
@@ -277,7 +287,7 @@ const AdmissionQueue = () => {
                     className="btn btn-primary btn-sm"
                     onClick={() => handleUpdateStatus(entry.id, 'waiting')}
                   >
-                    Вернуть
+                    {t('admissionQueue.actions.resume')}
                   </button>
                 )}
                 <button
@@ -285,7 +295,9 @@ const AdmissionQueue = () => {
                   onClick={() => handleDeleteEntry(entry.id)}
                   disabled={deletingId === entry.id}
                 >
-                  {deletingId === entry.id ? 'Удаление...' : 'Удалить'}
+                  {deletingId === entry.id
+                    ? t('admissionQueue.actions.deleting')
+                    : t('admissionQueue.actions.delete')}
                 </button>
               </div>
             </div>
