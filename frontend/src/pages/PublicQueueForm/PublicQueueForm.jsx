@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-// import ReCAPTCHA from 'react-google-recaptcha';
+import ReCAPTCHA from 'react-google-recaptcha';
 import api from '../../api';
 import QueueStatusCheck from '../../components/QueueStatusCheck/QueueStatusCheck';
 import { useTranslation } from 'react-i18next';
 import { FaChevronDown } from 'react-icons/fa';
 import './PublicQueueForm.css';
 
-// Программы по категориям (ключи для переводов)
 const BACHELOR_PROGRAMS = [
   'accounting',
   'appliedLinguistics',
@@ -50,7 +49,7 @@ const PublicQueueForm = () => {
     notes: '',
   });
 
-  // const [captchaToken, setCaptchaToken] = useState(null);
+  const [captchaToken, setCaptchaToken] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
@@ -92,9 +91,9 @@ const PublicQueueForm = () => {
     }
   };
 
-  // const handleCaptchaChange = (token) => {
-  //   setCaptchaToken(token);
-  // };
+  const handleCaptchaChange = (token) => {
+    setCaptchaToken(token);
+  };
 
   const toggleCategory = (category) => {
     setCategoryStates({
@@ -106,10 +105,10 @@ const PublicQueueForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // if (!captchaToken) {
-    //   setError(t('publicQueueForm.captchaError'));
-    //   return;
-    // }
+    if (!captchaToken) {
+      setError(t('publicQueueForm.captchaError'));
+      return;
+    }
 
     try {
       setLoading(true);
@@ -117,7 +116,7 @@ const PublicQueueForm = () => {
 
       await api.post('/api/public/queue', {
         ...formData,
-        // captcha_token: captchaToken,
+        captcha_token: captchaToken,
       });
 
       setSuccess(true);
@@ -146,7 +145,6 @@ const PublicQueueForm = () => {
     return (
       <div className="public-form-container">
         <div className="success-message">
-
           <h2>{t('publicQueueForm.successTitle')}</h2>
           <p>{t('publicQueueForm.successMessage')}</p>
           {queueCount !== null && (
@@ -170,9 +168,7 @@ const PublicQueueForm = () => {
 
   return (
     <div className="public-form-container">
-
       <h1>{t('publicQueueForm.title')}</h1>
-
       <p className="form-description">{t('publicQueueForm.description')}</p>
 
       {error && <div className="alert alert-danger">{error}</div>}
@@ -282,19 +278,17 @@ const PublicQueueForm = () => {
           </div>
         </div>
 
-        {/* 
         <div className="form-group captcha-container">
           <ReCAPTCHA
             sitekey="6LdkwT0rAAAAAAPWoQweToNny7P4FHheyz2SZIr8"
             onChange={handleCaptchaChange}
           />
-        </div> 
-        */}
+        </div>
 
         <button
           type="submit"
           className="btn btn-primary btn-submit"
-          disabled={loading /* || !captchaToken */}
+          disabled={loading || !captchaToken}
         >
           {loading ? t('publicQueueForm.submitting') : t('publicQueueForm.submitButton')}
         </button>
